@@ -20,3 +20,5 @@ Temporary Items
 # Environment Variables
 .env*
 !.env.example
+
+PLAN.md
