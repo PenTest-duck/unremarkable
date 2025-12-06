@@ -19,11 +19,6 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
 
-  // Extract form data from URL params (if present)
-  const prompt = searchParams.get("prompt");
-  const flavorsParam = searchParams.get("flavors");
-  const modelsParam = searchParams.get("models");
-
   // if "next" is in param, use it as the redirect URL
   let next = searchParams.get("next") ?? "/";
   if (!next.startsWith("/")) {
