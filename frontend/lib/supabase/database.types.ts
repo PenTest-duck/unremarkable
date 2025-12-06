@@ -53,6 +53,120 @@ export type Database = {
           },
         ]
       }
+      customer_questions: {
+        Row: {
+          created_at: string
+          id: string
+          order: number
+          question: string
+          user_id: string
+          world_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order: number
+          question: string
+          user_id: string
+          world_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order?: number
+          question?: string
+          user_id?: string
+          world_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_questions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_questions_world_id_fkey"
+            columns: ["world_id"]
+            isOneToOne: false
+            referencedRelation: "worlds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedbacks: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          feedback: string
+          id: string
+          persona_id: string
+          rating: number
+          simulation_id: string
+          user_id: string
+          world_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          feedback: string
+          id?: string
+          persona_id: string
+          rating: number
+          simulation_id: string
+          user_id: string
+          world_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          feedback?: string
+          id?: string
+          persona_id?: string
+          rating?: number
+          simulation_id?: string
+          user_id?: string
+          world_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedbacks_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_simulation_id_fkey"
+            columns: ["simulation_id"]
+            isOneToOne: false
+            referencedRelation: "simulations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_world_id_fkey"
+            columns: ["world_id"]
+            isOneToOne: false
+            referencedRelation: "worlds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       personas: {
         Row: {
           age: number

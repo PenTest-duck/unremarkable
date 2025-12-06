@@ -2,8 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 // Expected counts for progress tracking
-export const EXPECTED_SEGMENTS = 1; // 4
-export const PERSONAS_PER_SEGMENT = 1; // 4
+export const EXPECTED_SEGMENTS = 4; // 4
+export const PERSONAS_PER_SEGMENT = 3; // 3
 export const EXPECTED_PERSONAS = EXPECTED_SEGMENTS * PERSONAS_PER_SEGMENT;
 
 // Placeholder prefix used when world is first created (before background processing completes)

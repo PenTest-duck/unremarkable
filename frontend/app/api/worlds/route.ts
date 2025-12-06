@@ -234,6 +234,72 @@ type PersonaData = {
   story: string;
 };
 
+type CustomerQuestionData = {
+  question: string;
+  order: number;
+};
+
+async function generateCustomerQuestions(
+  worldDescription: string,
+  storeName: string
+): Promise<CustomerQuestionData[]> {
+  try {
+    const result = await ai.models.generateContent({
+      model: "gemini-flash-latest",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `You are creating onboarding questions for new visitors entering a simulated customer community world.
+
+Store: ${storeName}
+Description: ${worldDescription}
+
+Generate exactly 3 short, casual questions that help capture who this visitor is as a potential buyer. These questions will be asked when someone enters the world to create their buyer persona.
+
+Requirements:
+- Questions should be relevant to this specific store/product category
+- Keep questions short and conversational (not formal)
+- Mix of questions: one about their shopping intent/reason for browsing, one about their preferences/style, and one about their experience level or familiarity
+- Most visitors are low-intent browsers, so don't assume they're ready to buy
+- Questions should be open-ended (free text answers)
+
+Respond in JSON format only:
+{
+  "questions": [
+    { "question": "What brings you here today?", "order": 1 },
+    { "question": "...", "order": 2 },
+    { "question": "...", "order": 3 }
+  ]
+}`,
+            },
+          ],
+        },
+      ],
+    });
+
+    const text = result.text?.trim() || "";
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || [
+      null,
+      text,
+    ];
+    const parsed = JSON.parse(jsonMatch[1] || text);
+    return parsed.questions || [];
+  } catch (error) {
+    console.error("Gemini customer questions error", error);
+    // Return default questions as fallback
+    return [
+      { question: "What brings you here today?", order: 1 },
+      {
+        question: "What kind of products are you most interested in?",
+        order: 2,
+      },
+      { question: "How familiar are you with our store?", order: 3 },
+    ];
+  }
+}
+
 async function generatePersonas(
   worldDescription: string,
   segmentName: string,
@@ -429,6 +495,29 @@ async function processWorldInBackground(
   // NOTE: Don't update description yet! We use it as a completion marker.
   // The description will be updated at the END of all processing.
 
+  // Generate and insert customer questions (for visitor onboarding)
+  const customerQuestionsPromise = (async () => {
+    const questions = await generateCustomerQuestions(
+      worldDescription,
+      worldName
+    );
+    if (questions.length > 0) {
+      const { error: questionsError } = await supabase
+        .from("customer_questions")
+        .insert(
+          questions.map((q) => ({
+            question: q.question,
+            order: q.order,
+            world_id: worldId,
+            user_id: userId,
+          }))
+        );
+      if (questionsError) {
+        console.error("Failed to insert customer questions", questionsError);
+      }
+    }
+  })();
+
   // Insert products
   if (products.length > 0) {
     const prepared = products.map((p) => ({
@@ -555,8 +644,9 @@ async function processWorldInBackground(
   // Wait for all personas to be created
   await Promise.all(personaPromises);
 
-  // Wait for backdrop
+  // Wait for backdrop and customer questions
   await backdropPromise;
+  await customerQuestionsPromise;
 
   // FINAL STEP: Update world with generated description
   // This marks the world as "ready" - the progress endpoint checks for this
